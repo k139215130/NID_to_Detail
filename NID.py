@@ -3,10 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import os
-
+import time
 
 def get_NID_detail(username, password, nid):
      s = requests.Session()
+     time.sleep(1)
      try:
           login = s.get("http://infocenter.fcu.edu.tw/assoc/assoc_login.jsp", timeout=3)
      except:
