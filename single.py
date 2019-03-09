@@ -3,11 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import os
-import time
 
 def get_NID_detail(username, password, nid):
      s = requests.Session()
-     time.sleep(1)
+
      try:
           login = s.get("http://infocenter.fcu.edu.tw/assoc/assoc_login.jsp", timeout=3)
      except:
@@ -21,6 +20,15 @@ def get_NID_detail(username, password, nid):
      }
 
      login = s.post('http://infocenter.fcu.edu.tw/assoc/authenticate.jsp', data=loginData)
+
+     bs_loginPage = BeautifulSoup(login.text, "html.parser").get_text(strip=True)  # 分析登入頁面
+
+     if re.search('對不起!!您的帳號/密碼有誤!!', bs_loginPage):
+          print('密碼輸入錯誤!')
+          os._exit(0)
+     elif re.search('對不起!!您無權進入系統!', bs_loginPage):
+          print('帳號密碼輸入錯誤!')
+          os._exit(0)
 
      searchData = {
           'stuid': nid,  # 學號
@@ -36,8 +44,6 @@ def get_NID_detail(username, password, nid):
           return d
      else:
           result = bs_searchPage.select("table.tableStyle td.tableContentLeft")
-
-          # re.sub('\s','',str(i)) 去掉空白
           newResult = []
 
           for i in result:
