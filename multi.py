@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 import re
 import os
 from openpyxl import load_workbook, Workbook
+from openpyxl.styles import colors
+from openpyxl.styles import Font, Color
 
 # 讀檔後放入 nidList
 nidList = []
@@ -51,6 +53,7 @@ wb = Workbook(write_only=True)
 ws = wb.create_sheet('詳細資料')
 
 print('開始查詢!')
+flag = 0
 
 for nid in nidList:
 	searchData = {
@@ -63,6 +66,7 @@ for nid in nidList:
 	bs_searchPage = BeautifulSoup(searchPage.text, "html.parser")  # 分析查詢頁面
 
 	if re.search('抱歉, 資料不存在!', bs_searchPage.get_text(strip=True)):
+		flag = 1
 		d = {'學號': nid, '系級': '查無資料', '姓名': '查無資料','性別': '查無資料', '出生年月日': '查無資料'}
 	else:
 		result = bs_searchPage.select("table.tableStyle td.tableContentLeft")
@@ -80,4 +84,22 @@ print('開始寫檔!!!')
 
 wb.save('output.xlsx') 
 
-print('寫檔完畢!!!')
+if flag == 0:
+	print('寫檔完畢!!!')
+	os._exit(0)
+else:
+	option = input('是否將無資料欄位標註為紅色(y/n)')
+	if option == 'n' or option == 'N':
+		print('寫檔完畢!!!')
+		os._exit(0)
+	elif option == 'y' or option == 'Y':
+		ft = Font(color=colors.RED)
+		wb = load_workbook('output.xlsx')
+		sheet = wb.active
+		for row in sheet.rows:
+			for cell in row:
+				if cell.value == '查無資料':
+					cell.font = ft
+		wb.save('output.xlsx') 
+		print('寫檔完畢!!!')
+		os._exit(0)
