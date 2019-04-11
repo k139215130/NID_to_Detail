@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block body %}
+
+<div class="container">
+    {{ render_form(form) }}
+    <hr>
+    {% if result %}
+    <div class="card border-dark">
+        <div class="card-header">Result</div>
+        <div class="card-body">
+            {% for k, v in result.items() %}
+            <p>{{ k }}:{{ v }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

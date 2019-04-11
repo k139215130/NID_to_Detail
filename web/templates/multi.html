@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+
+
+<div class="container">
+    <form method="POST" enctype="multipart/form-data" class="form">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.username.label() }}
+            {{ form.username(class_="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.password.label() }}
+            {{ form.password(class_="form-control") }}
+        </div>
+        <label for="file">上傳檔案</label>
+        <div class="input-group">    
+            <div class="custom-file">
+                {{ form.file(class_="custom-file-input") }}
+                {{ form.file.label(class_="custom-file-label") }}
+            </div>
+        </div>
+        <br>
+        {{ form.submit(class_="btn btn-secondary") }}
+    </form>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<!--在input裡顯示檔案名稱-->
+<script type="text/javascript">
+    $('#file').change(function (e) {
+        $(this).next('.custom-file-label').html(e.target.files[0].name);
+    });
+</script>
+{% endblock %}
