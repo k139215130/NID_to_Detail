@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from flask import Flask, render_template, flash, send_file
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_bootstrap import Bootstrap
+from flask_sqlalchemy import SQLAlchemy
 
 # get nid
 import requests
@@ -25,8 +26,11 @@ from pyecharts import Bar
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hard to guess string"
 app.config['UPLOAD_FOLDER'] = "hard to guess string"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 bootstrap = Bootstrap(app)
+db = SQLAlchemy(app)
 
+"""Forms"""
 class SingleForm(FlaskForm):
     username = StringField('學號', validators=[DataRequired()])
     password = PasswordField('密碼', validators=[DataRequired()])
@@ -37,7 +41,32 @@ class MultiForm(FlaskForm):
     username = StringField('學號', validators=[DataRequired()])
     password = PasswordField('密碼', validators=[DataRequired()])
     file = FileField(validators=[FileRequired(), FileAllowed(['xlsx'], 'xlsx Only!')])
+    store = BooleanField('是否將資料存置資料庫')
+    name = StringField('名稱')
     submit = SubmitField("Submit")
+
+"""Models"""
+class Activity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+
+    @classmethod
+    def get_all_activity_list(cls):
+        return cls.query.all()
+
+class Member(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    nid = db.Column(db.String(10), nullable=False)
+    department = db.Column(db.String(10), nullable=False)
+    sex = db.Column(db.String(1), nullable=False)
+    birthday = db.Column(db.String(10), nullable=False)
+    activity_id = db.Column(db.Integer, db.ForeignKey('activity.id'),nullable=False)
+    activity = db.relationship('Activity',backref=db.backref('members', lazy=True))
+
+    @classmethod
+    def get_activity_member_count(cls, id):
+        return cls.query.filter_by(activity_id=id).count()
 
 @app.route("/")
 def index():
@@ -83,14 +112,24 @@ def single():
 
 @app.route("/chart")
 def chart():
-    bar = Bar("主標題", "副標題")
-    bar.add("A", ["B", "C", "D", "E", "F", "G"], [5, 20, 36, 10, 75, 90])
-    return render_template('chart.html', chart=bar.render_embed())
+    name = []
+    count = []
+    for i in Activity.get_all_activity_list():
+        name.append(i.name)
+        count.append(Member.get_activity_member_count(id=i.id))
+    bar = Bar("黑客社", "社課總人數")
+    bar.add("人數", name, count)
+    all_number_chart=bar.render_embed()
+    #bar.add("人數", ["B", "C", "D", "E", "F", "G"], [5, 20, 36, 10, 75, 90])
+    return render_template('chart.html', all_number_chart=all_number_chart)
 
 @app.route("/multi", methods=['GET','POST'])
 def multi():
     form = MultiForm()
     if form.validate_on_submit():
+        if form.store.data:
+            act = Activity(name=form.name.data)
+            db.session.add(act)
         f = form.file.data
         f.save(f.filename)
         # 讀檔後放入 nidList
@@ -135,13 +174,21 @@ def multi():
                 for i in result:
                     newResult.append(re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
                 d = {'學號': newResult[0], '系級': newResult[1], '姓名': newResult[2], '性別': newResult[3], '出生年月日': newResult[4]}
+            if form.store.data:
+                member = Member(name=d['姓名'], nid=d['學號'], department=d['系級'], sex=d['性別'], birthday=d['出生年月日'], activity=act)
+                db.session.add(member)
             ws.append([d['學號'], d['系級'], d['姓名'], d['性別'], d['出生年月日']])
+        db.session.commit()
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             tmp.seek(0)
             stream = tmp.read()
             return send_file(BytesIO(stream), attachment_filename='output.xlsx', as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     return render_template('multi.html', form=form)
+
+@app.route("/")
+def show():
+    return render_template('show.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
