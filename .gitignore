@@ -257,3 +257,6 @@ dmypy.json
 
 # DB
 *.db
+
+#Excel
+*.xlsx
