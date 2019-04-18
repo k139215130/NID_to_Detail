@@ -24,8 +24,10 @@
         {% endfor %}
     </p>
     <div class="collapse" id="collapseExample">
-        <div class="card card-body">
-            {{ all_course_charts }}
+        <div class="card border-dark">
+            <div class="card-body">
+                {{ all_course_charts }}
+            </div>
         </div>
     </div>
 
@@ -51,39 +53,64 @@
         </p>
         <!--男女人數-->
         <div class="collapse" id="collapseSex-{{ loop.index }}">
-            <div class="card card-body">
-                {{ sex_number_charts[loop.index-1] }}
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 男女人數
+                </div>
+                <div class="card-body">
+                    {{ sex_number_charts[loop.index-1] }}
+                </div>
             </div>
         </div>
         <!--各系人數-->
         <div class="collapse" id="collapseDepartment-{{ loop.index }}">
-            <div class="card card-body">
-                <p>各系人數{{ i }}</p>
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 各系人數
+                </div>
+                <div class="card-body">
+                    <p>各系人數{{ i }}</p>
+                </div>
             </div>
         </div>
         <!--各年級人數-->
         <div class="collapse" id="collapseLevel-{{ loop.index }}">
-            <div class="card card-body">
-                {{ level_number_charts[loop.index-1] }}
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 各年級人數
+                </div>
+                <div class="card-body">
+                    {{ level_number_charts[loop.index-1] }}
+                </div>
             </div>
         </div>
         <!--各學院人數-->
         <div class="collapse" id="collapseCollege-{{ loop.index }}">
-            <div class="card card-body">
-                <p>各學院人數{{ i }}</p>
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 各學院人數
+                </div>
+                <div class="card-body">
+                    <p>各學院人數{{ i }}</p>
+                </div>
             </div>
         </div>
         <!--詳細資料-->
         <div class="collapse" id="collapseDetail-{{ loop.index }}">
-            <div class="card card-body">
-                {% for item in all_course_detail[loop.index-1] %}
-                <p>{{ item.nid }}</p>
-                <p>{{ item.name }}</p>
-                <p>{{ item.department }}</p>
-                <p>{{ item.sex }}</p>
-                <p>{{ item.birthday }}</p>
-                <hr>
-                {% endfor %}
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 詳細資料
+                </div>
+                <div class="card-body">
+                    {% for item in all_course_detail[loop.index-1] %}
+                    <p>{{ item.nid }}</p>
+                    <p>{{ item.name }}</p>
+                    <p>{{ item.department }}</p>
+                    <p>{{ item.sex }}</p>
+                    <p>{{ item.birthday }}</p>
+                    <hr>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
