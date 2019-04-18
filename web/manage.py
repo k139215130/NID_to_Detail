@@ -97,10 +97,12 @@ class Member(db.Model):
     def get_department_number(cls, id):
         result = {}
         for i in cls.query.filter_by(activity_id=id).all():
+            s = re.findall(r'[^一,二,三,四]*', i.department)[0]
+            print(s)
             try:
-                result[i.department] = result[i.department]+1
+                result[s] = result[s]+1
             except KeyError:
-                result[i.department] = 1
+                result[s] = 1
         return result
 
 @app.route("/")
