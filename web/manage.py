@@ -21,7 +21,7 @@ from io import BytesIO
 import os
 
 # chart
-from pyecharts import Bar
+from pyecharts import Line, Bar, Pie
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hard to guess string"
@@ -50,6 +50,7 @@ class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
 
+    #全部社課
     @classmethod
     def get_all_activity_list(cls):
         return cls.query.all()
@@ -64,9 +65,34 @@ class Member(db.Model):
     activity_id = db.Column(db.Integer, db.ForeignKey('activity.id'),nullable=False)
     activity = db.relationship('Activity',backref=db.backref('members', lazy=True))
 
+    #單一社課人數總和
     @classmethod
     def get_activity_member_count(cls, id):
         return cls.query.filter_by(activity_id=id).count()
+    #單一社課全部資料
+    @classmethod
+    def get_activity_member(cls, id):
+        return cls.query.filter_by(activity_id=id).all()
+    #單一社課男女人數
+    @classmethod
+    def get_sex_number(cls, id):
+        boy = cls.query.filter_by(activity_id=id, sex='男').count()
+        girl = cls.query.filter_by(activity_id=id, sex='女').count()
+        return [boy,girl]
+    #單一社課年級人數
+    @classmethod
+    def get_level_number(cls, id):
+        result = [0,0,0,0]
+        for i in cls.query.filter_by(activity_id=id).all():
+            if re.search(r'一', i.department):
+                result[0] = result[0] + 1
+            elif re.search(r'二', i.department):
+                result[1] = result[1] + 1
+            elif re.search(r'三', i.department):
+                result[2] = result[2] + 1
+            elif re.search(r'四', i.department):
+                result[3] = result[3] + 1
+        return result
 
 @app.route("/")
 def index():
@@ -110,18 +136,35 @@ def single():
         return render_template('single.html', form=form, result=result)
     return render_template('single.html', form=form)
 
-@app.route("/chart")
+@app.route("/chart", methods=['GET', 'POST'])
 def chart():
-    name = []
-    count = []
+    all_course_people = [] #全部社課人數
+    all_course_detail = [] #全部社課詳細資料
+    all_course_name = [] #全部社課名稱
+    sex_number_charts = [] #全部社課男女人數圖表
+    level_number_charts = [] #全部社課年級人數圖表
+
     for i in Activity.get_all_activity_list():
-        name.append(i.name)
-        count.append(Member.get_activity_member_count(id=i.id))
-    bar = Bar("黑客社", "社課總人數")
-    bar.add("人數", name, count)
-    all_number_chart=bar.render_embed()
+        all_course_name.append(i.name)
+        all_course_people.append(Member.get_activity_member_count(id=i.id))
+        all_course_detail.append(Member.get_activity_member(id=i.id))
+
+        #單一社課男女人數(圖)
+        pie = Pie(i.name, "男女人數")
+        pie.add("人數", ['男生', '女生'], Member.get_sex_number(id=i.id))
+        sex_number_charts.append(pie.render_embed())
+        #單一社課年級人數(圖)
+        bar = Bar(i.name, "年級人數")
+        bar.add("人數", ['大一', '大二', '大三', '大四'], Member.get_level_number(id=i.id))
+        level_number_charts.append(bar.render_embed())
+    
+    #全部社課總人數+名稱(直線圖)
+    line = Line("黑客社", "社課總人數")
+    line.add("人數", all_course_name, all_course_people)
+    all_course_charts = line.render_embed()
+
     #bar.add("人數", ["B", "C", "D", "E", "F", "G"], [5, 20, 36, 10, 75, 90])
-    return render_template('chart.html', all_number_chart=all_number_chart)
+    return render_template('chart.html', all_course_charts=all_course_charts, all_course_name=all_course_name, all_course_detail=all_course_detail, sex_number_charts=sex_number_charts, level_number_charts=level_number_charts)
 
 @app.route("/multi", methods=['GET','POST'])
 def multi():
