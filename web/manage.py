@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, flash, send_file
+from flask import Flask, render_template, flash, send_file, request, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 
@@ -98,7 +98,6 @@ class Member(db.Model):
         result = {}
         for i in cls.query.filter_by(activity_id=id).all():
             s = re.findall(r'[^一,二,三,四]*', i.department)[0]
-            print(s)
             try:
                 result[s] = result[s]+1
             except KeyError:
@@ -253,9 +252,24 @@ def multi():
             return send_file(BytesIO(stream), attachment_filename='output.xlsx', as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     return render_template('multi.html', form=form)
 
-@app.route("/")
-def show():
-    return render_template('show.html')
+@app.route("/edit", methods=['GET', 'POST'])
+def edit():
+    all_course = []
+    all_course_detail = []
+    for i in Activity.get_all_activity_list():
+        all_course.append(i)
+        all_course_detail.append(Member.get_activity_member(id=i.id))
+    if request.method == 'POST':
+        if request.form.get("course-id"):
+            for i in Member.query.filter_by(activity_id=request.form.get("course-id")).all():
+                db.session.delete(i)
+            db.session.delete(Activity.query.filter_by(id=request.form.get("course-id")).first())
+            db.session.commit()
+        if request.form.get("student-id"):
+            db.session.delete(Member.query.filter_by(id=request.form.get("student-id")).first())
+            db.session.commit()
+        return redirect(url_for('.edit'))
+    return render_template('edit.html', all_course=all_course, all_course_detail=all_course_detail)
 
 if __name__ == '__main__':
     app.run(debug=True)
