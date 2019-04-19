@@ -16,3 +16,4 @@ class MultiForm(FlaskForm):
     store = BooleanField('是否將資料存置資料庫')
     name = StringField('名稱')
     submit = SubmitField("Submit")
+    
