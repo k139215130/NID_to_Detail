@@ -61,7 +61,6 @@
     </nav>
     {% endblock %}
     {% block content %}{% endblock %}
-    {% block footer %}
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -73,7 +72,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
         integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
         crossorigin="anonymous"></script>
-    {% endblock %}
+    {% block js %}{% endblock %}
     <p class="mt-5 mb-3 text-muted text-center">&copy; 2019</p>
 </body>
 
