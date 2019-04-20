@@ -2,8 +2,133 @@
 
 {% block title %}Chart{% endblock %}
 
+{% block head %}
+<script src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h3>Chart</h3>
+    <!--最上方按鈕-->
+    <p>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
+            aria-expanded="false" aria-controls="collapseExample">
+            社課總人數
+        </button>
+        {% for c in all_course_name %}
+        <button class="btn btn-primary" type="button" data-toggle="collapse"
+            data-target="#collapseCourse-{{ forloop.counter0 }}" aria-expanded="false"
+            aria-controls="collapseCourse-{{ forloop.counter0 }}">
+            {{ c }}
+        </button>
+        {% endfor %}
+    </p>
+    <div class="collapse" id="collapseExample">
+        <div class="card border-dark">
+            <div class="card-body">
+                {{ all_course_charts }}
+            </div>
+        </div>
+    </div>
+
+    <!--詳細資料按鈕-->
+    {% for i in all_course_name %}
+    <div class="collapse" id="collapseCourse-{{ forloop.counter0 }}">
+        <p>
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#collapseSex-{{ forloop.counter0 }}" aria-expanded="false"
+                aria-controls="collapseSex-{{ forloop.counter0 }}">{{ i }}-男女人數</button>
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#collapseDepartment-{{ forloop.counter0 }}" aria-expanded="false"
+                aria-controls="collapseDepartment-{{ forloop.counter0 }}">{{ i }}-各系人數</button>
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#collapseLevel-{{ forloop.counter0 }}" aria-expanded="false"
+                aria-controls="collapseLevel-{{ forloop.counter0 }}">{{ i }}-各年級人數</button>
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#collapseCollege-{{ forloop.counter0 }}" aria-expanded="false"
+                aria-controls="collapseCollege-{{ forloop.counter0 }}">{{ i }}-各學院人數</button>
+            <button class="btn btn-info" type="button" data-toggle="collapse"
+                data-target="#collapseDetail-{{ forloop.counter0 }}" aria-expanded="false"
+                aria-controls="collapseDetail-{{ forloop.counter0 }}">{{ i }}-詳細資料</button>
+        </p>
+        <!--男女人數-->
+        <div class="collapse" id="collapseSex-{{ forloop.counter0 }}">
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 男女人數
+                </div>
+                <div class="card-body">
+                    {% for j in sex_number_charts %}
+                        {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                            {{ j }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!--各系人數-->
+        <div class="collapse" id="collapseDepartment-{{ forloop.counter0 }}">
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 各系人數
+                </div>
+                <div class="card-body">
+                    {% for j in department_number_charts %}
+                        {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                            {{ j }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!--各年級人數-->
+        <div class="collapse" id="collapseLevel-{{ forloop.counter0 }}">
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 各年級人數
+                </div>
+                <div class="card-body">
+                    {% for j in level_number_charts %}
+                        {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                            {{ j }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!--各學院人數-->
+        <div class="collapse" id="collapseCollege-{{ forloop.counter0 }}">
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 各學院人數
+                </div>
+                <div class="card-body">
+                    <p>各學院人數{{ i }}</p>
+                </div>
+            </div>
+        </div>
+        <!--詳細資料-->
+        <div class="collapse" id="collapseDetail-{{ forloop.counter0 }}">
+            <div class="card border-dark">
+                <div class="card-header">
+                    {{ i }} - 詳細資料
+                </div>
+                <div class="card-body">
+                    {% for j in all_course_detail %}
+                        {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                            {% for item in j %}
+                            <p>{{ item.nid }}</p>
+                            <p>{{ item.name }}</p>
+                            <p>{{ item.department }}</p>
+                            <p>{{ item.sex }}</p>
+                            <p>{{ item.birthday }}</p>
+                            <hr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

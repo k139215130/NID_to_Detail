@@ -1,4 +1,5 @@
 from django.db import models
+import re
 
 # Create your models here.
 
@@ -9,7 +10,7 @@ class Activity(models.Model):
     #全部社課
     @classmethod
     def get_all_activity_list(cls):
-        return cls.query.all()
+        return cls.objects.all()
 
 """
 一個 Activity 有多個 Member，一對多的關係
@@ -26,23 +27,23 @@ class Member(models.Model):
 
     #單一社課人數總和
     @classmethod
-    def get_activity_member_count(cls, id):
-        return cls.query.filter_by(activity_id=id).count()
+    def get_activity_member_count(cls, act):
+        return cls.objects.filter(activity=act).count()
     #單一社課全部資料
     @classmethod
-    def get_activity_member(cls, id):
-        return cls.query.filter_by(activity_id=id).all()
+    def get_activity_member(cls, act):
+        return cls.objects.filter(activity=act).all()
     #單一社課男女人數
     @classmethod
-    def get_sex_number(cls, id):
-        boy = cls.query.filter_by(activity_id=id, sex='男').count()
-        girl = cls.query.filter_by(activity_id=id, sex='女').count()
+    def get_sex_number(cls, act):
+        boy = cls.objects.filter(activity=act).filter(sex='男').count()
+        girl = cls.objects.filter(activity=act).filter(sex='女').count()
         return [boy,girl]
     #單一社課年級人數
     @classmethod
-    def get_level_number(cls, id):
+    def get_level_number(cls, act):
         result = [0,0,0,0]
-        for i in cls.query.filter_by(activity_id=id).all():
+        for i in cls.objects.filter(activity=act).all():
             if re.search(r'一', i.department):
                 result[0] = result[0] + 1
             elif re.search(r'二', i.department):
@@ -54,9 +55,9 @@ class Member(models.Model):
         return result
     #單一社課各系人數
     @classmethod
-    def get_department_number(cls, id):
+    def get_department_number(cls, act):
         result = {}
-        for i in cls.query.filter_by(activity_id=id).all():
+        for i in cls.objects.filter(activity=act).all():
             s = re.findall(r'[^一,二,三,四]*', i.department)[0]
             try:
                 result[s] = result[s]+1
