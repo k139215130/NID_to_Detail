@@ -5,7 +5,6 @@ from django.db import models
 """活動名稱"""
 class Activity(models.Model):
     name = models.CharField(max_length=80)
-    #name = db.Column(db.String(80), nullable=False)
 
     #全部社課
     @classmethod
@@ -23,7 +22,7 @@ class Member(models.Model):
     department = models.CharField(max_length=20) #系級(ex.資訊一甲)
     sex = models.CharField(max_length=1) #性別
     birthday = models.CharField(max_length=20) #出生年月日(ex.1999/09/09)
-    activity_id = models.ForeignKey(Activity, on_delete=models.CASCADE)
+    activity = models.ForeignKey(Activity, related_name='activitys', on_delete=models.CASCADE)
 
     #單一社課人數總和
     @classmethod
@@ -64,3 +63,4 @@ class Member(models.Model):
             except KeyError:
                 result[s] = 1
         return result
+

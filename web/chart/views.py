@@ -72,7 +72,8 @@ def single(request):
 
 def multi(request):
     if request.method == "POST":
-        print(request.POST.get('check')) #None on
+        if request.POST.get('check') == 'on':
+            act = Activity.objects.create(name=request.POST.get('name'))
         # 讀檔後放入 nidList
         nidList = []
         wb = load_workbook(filename=request.FILES['file'], read_only=True)
@@ -118,11 +119,10 @@ def multi(request):
                 for i in result:
                     newResult.append(re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
                 d = {'學號': newResult[0], '系級': newResult[1], '姓名': newResult[2], '性別': newResult[3], '出生年月日': newResult[4]}
-            # if form.store.data:
-            #     member = Member(name=d['姓名'], nid=d['學號'], department=d['系級'], sex=d['性別'], birthday=d['出生年月日'], activity=act)
-            #     db.session.add(member)
+            # 儲存置資料庫
+            if request.POST.get('check') == 'on':
+                act.activitys.create(name=d['姓名'], nid=d['學號'], department=d['系級'], sex=d['性別'], birthday=d['出生年月日'])
             ws.append([d['學號'], d['系級'], d['姓名'], d['性別'], d['出生年月日']])
-        # db.session.commit()
         response = HttpResponse(save_virtual_workbook(wb), content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename=Output.xlsx'
         return response
