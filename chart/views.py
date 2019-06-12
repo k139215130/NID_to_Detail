@@ -20,13 +20,14 @@ from openpyxl.writer.excel import save_virtual_workbook
 #Chart
 from pyecharts import Line, Bar, Pie
 
-def index(request):
-    return render(request, 'index.html', {})
-
+# forms
+from .forms import SingleForm
 
 def single(request):
+    form = SingleForm()
     result = {}
     if request.method == "POST":
+        form = SingleForm(request.POST)
         s = requests.Session()
         # 檢查網路狀態
         try:
@@ -69,8 +70,8 @@ def single(request):
                     re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
             result = {'學號': newResult[0], '系級': newResult[1],
                       '姓名': newResult[2], '性別': newResult[3], '出生年月日': newResult[4]}
-        return render(request, 'single.html', {'result':result})
-    return render(request, 'single.html', {})
+        form = SingleForm()
+    return render(request, 'single.html', {'form':form, 'result':result})
 
 
 def multi(request):

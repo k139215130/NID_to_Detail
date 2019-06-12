@@ -1,82 +1,56 @@
 {% extends "layout.html" %}
 
-{% block title %}Single{% endblock %}
+{% block title %}K139 - Single Nid{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h3>單一查詢</h3>
+    <h3>Get Single Nid</h3>
     <hr>
     <form method="POST">
         {% csrf_token %}
 
-        {# 判斷是否有錯誤訊息，若無則為正常輸入框 #}
-        {% if messages %}
-            {% for message in messages %}
-                {# 判斷訊息種類 #}
-                {% if message.tags == 'all error' %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="form-group">
-                    <label for="singleUsername">帳號</label>
-                    <input type="text" class="form-control is-invalid" id="singleUsername" aria-describedby="usernameHelp"
-                        placeholder="Enter Username" name="username">
-                    <div class="invalid-feedback">
-                        {{ message }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="singlePassword">密碼</label>
-                    <input type="password" class="form-control" id="singlePassword" aria-describedby="passwordHelp"
-                        placeholder="Enter Password" name="password">
-                </div>
-                {% endif %}
-                {% if message.tags == 'user error' %}
-                <div class="form-group">
-                    <label for="singleUsername">帳號</label>
-                    <input type="text" class="form-control is-invalid" id="singleUsername" aria-describedby="usernameHelp"
-                        placeholder="Enter Username" name="username">
-                    <div class="invalid-feedback">
-                        {{ message }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="singlePassword">密碼</label>
-                    <input type="password" class="form-control is-invalid" id="singlePassword" aria-describedby="passwordHelp"
-                        placeholder="Enter Password" name="password">
-                    <div class="invalid-feedback">
-                        {{ message }}
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            <div class="form-group">
-                <label for="singleUsername">帳號</label>
-                <input type="text" class="form-control" id="singleUsername" aria-describedby="usernameHelp"
-                    placeholder="Enter Username" name="username">
-                <small id="usernameHelp" class="form-text text-muted">請輸入您的 NID 帳號</small>
-            </div>
-            <div class="form-group">
-                <label for="singlePassword">密碼</label>
-                <input type="password" class="form-control" id="singlePassword" aria-describedby="passwordHelp"
-                    placeholder="Enter Password" name="password">
-                <small id="passwordHelp" class="form-text text-muted">請輸入您的 NID 密碼</small>
-            </div>
-        {% endif %}
         <div class="form-group">
-            <label for="singleNid">欲查詢學號</label>
-            <input type="text" class="form-control" id="singleNid" placeholder="Enter Search NID" name="nid">
+            {{ form.username.label_tag }}
+            {{ form.username }}
         </div>
+        {% if form.username.errors %}
+        <div class="alert alert-danger" role="alert">
+            {{form.username.errors.0}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="form-group">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+        {% if form.password.errors %}
+        <div class="alert alert-danger" role="alert">
+            {{form.password.errors.0}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            {{ form.nid.label_tag }}
+            {{ form.nid }}  
+        </div>
+        {% if form.nid.errors %}
+        <div class="alert alert-danger" role="alert">
+            {{form.nid.errors.0}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary" id="btn">Submit</button>
     </form>
     <hr>
     {% if result %}
-    <hr>
     <div class="card border-dark">
         <div class="card-header">Result</div>
         <div class="card-body">
@@ -86,5 +60,6 @@
         </div>
     </div>
     {% endif %}
+
 </div>
 {% endblock %}
