@@ -19,8 +19,9 @@ from django.shortcuts import render
 from . import views
 
 urlpatterns = [
-    path('', include('chart.urls')),
-    path('', include('django.contrib.auth.urls')),
+    path('chart/', include('chart.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/register/', views.register, name='register'),
     path('admin/', admin.site.urls),
     path('', views.index, name='index')
 ]

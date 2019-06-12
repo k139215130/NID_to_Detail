@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}HackerSir - Regist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>Regist</h3>
+    <hr>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">帳號</label>
+            <input type="text" class="form-control" id="username" placeholder="輸入帳號" name="username">
+        </div>
+        {% if form.username.errors %}
+        <div class="alert alert-danger" role="alert">
+            {{form.username.errors.0}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="password1">密碼</label>
+            <input type="password" class="form-control" id="password1" placeholder="輸入密碼" name="password1">
+        </div>
+        {% if form.password1.errors %}
+        <div class="alert alert-danger" role="alert">
+            {{form.password1.errors.0}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="password2">確認密碼</label>
+            <input type="password" class="form-control" id="password2" placeholder="再次輸入密碼" name="password2">
+        </div>
+        {% if form.password2.errors %}
+        <div class="alert alert-danger" role="alert">
+            {{form.password2.errors.0}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <a href="{% url 'login' %}">已經有帳號嗎?點此前往登入</a>
+        </div>
+        <button type="submit" class="btn btn-primary">註冊</button>
+    </form>
+</div>
+{% endblock %}

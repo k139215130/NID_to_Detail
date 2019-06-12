@@ -1,11 +1,15 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<meta http-equiv="refresh" content="2;url=/" />
+{% endblock %}
+
 {% block title %}HackerSir - Logout{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        已成功登出
+        已成功登出(2秒後將自動跳轉至首頁)
         <a href="{% url 'index' %}" class="alert-link">點此回首頁</a>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
