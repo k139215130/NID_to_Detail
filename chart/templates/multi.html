@@ -1,105 +1,175 @@
 {% extends "layout.html" %}
 
-{% block title %}Multi{% endblock %}
+{% block title %}HackerSir - Multi Nid{% endblock %}
 
 {% block content %}
 <div class="container">
     <h3>多筆資料查詢</h3>
     <hr>
+    {% if addform.name.errors %}
+    <div class="alert alert-danger" role="alert">
+        新增活動標籤失敗
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
     <form enctype="multipart/form-data" method="POST">
         {% csrf_token %}
 
-        {# 判斷是否有錯誤訊息，若無則為正常輸入框 #}
-        {% if messages %}
-            {% for message in messages %}
-                {# 判斷訊息種類 #}
-                {% if message.tags == 'all error' %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="form-group">
-                    <label for="singleUsername">帳號</label>
-                    <input type="text" class="form-control is-invalid" id="singleUsername" aria-describedby="usernameHelp"
-                        placeholder="Enter Username" name="username">
-                    <div class="invalid-feedback">
-                        {{ message }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="singlePassword">密碼</label>
-                    <input type="password" class="form-control" id="singlePassword" aria-describedby="passwordHelp"
-                        placeholder="Enter Password" name="password">
-                </div>
-                {% endif %}
-                {% if message.tags == 'user error' %}
-                <div class="form-group">
-                    <label for="singleUsername">帳號</label>
-                    <input type="text" class="form-control is-invalid" id="singleUsername" aria-describedby="usernameHelp"
-                        placeholder="Enter Username" name="username">
-                    <div class="invalid-feedback">
-                        {{ message }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="singlePassword">密碼</label>
-                    <input type="password" class="form-control is-invalid" id="singlePassword" aria-describedby="passwordHelp"
-                        placeholder="Enter Password" name="password">
-                    <div class="invalid-feedback">
-                        {{ message }}
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            <div class="form-group">
-                <label for="singleUsername">帳號</label>
-                <input type="text" class="form-control" id="singleUsername" aria-describedby="usernameHelp"
-                    placeholder="Enter Username" name="username">
-                <small id="usernameHelp" class="form-text text-muted">請輸入您的 NID 帳號</small>
-            </div>
-            <div class="form-group">
-                <label for="singlePassword">密碼</label>
-                <input type="password" class="form-control" id="singlePassword" aria-describedby="passwordHelp"
-                    placeholder="Enter Password" name="password">
-                <small id="passwordHelp" class="form-text text-muted">請輸入您的 NID 密碼</small>
-            </div>
-        {% endif %}
-
-
-        <label for="file">上傳檔案</label>
-        <div class="input-group">
-            <div class="custom-file">
-                <input type="file" class="custom-file-input" id="file" name="file" aria-describedby="fileHelp">
-                <label class="custom-file-label" for="file">Choose file</label>
-            </div>
+        <div class="form-group">
+            <label for="singleUsername">帳號</label>
+            <input type="text" class="form-control" id="singleUsername" aria-describedby="usernameHelp"
+                placeholder="Enter Username" name="username">
+            <small id="usernameHelp" class="form-text text-muted">請輸入您的 NID 帳號</small>
         </div>
-        <small id="fileHelp" class="form-text text-muted">請選擇上傳檔案(只限 <code>.xlsx</code>)</small>
-        <br>
+        <div class="form-group">
+            <label for="singlePassword">密碼</label>
+            <input type="password" class="form-control" id="singlePassword" aria-describedby="passwordHelp"
+                placeholder="Enter Password" name="password">
+            <small id="passwordHelp" class="form-text text-muted">請輸入您的 NID 密碼</small>
+        </div>
+
+        <!-- 上傳檔案 -->
+        <div class="form-group">
+            <label for="file">上傳檔案</label>
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file" name="file" aria-describedby="fileHelp">
+                    <label class="custom-file-label" for="file">Choose file</label>
+                </div>
+            </div>
+            <small id="fileHelp" class="form-text text-muted">請選擇上傳檔案(只限 <code>.xlsx</code>)</small>
+        </div>
+
         <div class="form-group form-check">
             <input type="checkbox" class="form-check-input" id="multiCheck" name="check" aria-describedby="checkHelp">
             <label class="form-check-label" for="multiCheck">是否將資料儲存至資料庫</label>
             <small id="checkHelp" class="form-text text-muted">若將資料儲存置資料庫則可以至圖表頁面檢視</small>
         </div>
+
         <div class="form-group">
-            <label for="multiName">名稱</label>
-            <input type="text" class="form-control" id="multiName" aria-describedby="nameHelp" placeholder="Enter Name"
-                name="name">
-            <small id="nameHelp"
-                class="form-text text-muted">儲存至資料庫名稱(若不儲存可不填)</small>
+            <label for="multiName">活動標籤名稱</label>
+            <div class="input-group">
+                <select class="custom-select" id="inputGroupSelect" aria-label="請選擇" name="tag"
+                    aria-describedby="tagHelp">
+                    <option selected>Choose...</option>
+                    {% if tag %}
+                    {% for i in tag %}
+                    <option>{{ i.name }}</option>
+                    {% endfor %}
+                    {% else %}
+                    <option>無資料</option>
+                    {% endif %}
+                </select>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-primary" type="button" data-toggle="modal"
+                        data-target="#exampleModalCenter">Add</button>
+                </div>
+            </div>
+            <small id="tagHelp" class="form-text text-muted">儲存至資料庫標籤名稱，若不儲存可不選擇，若沒有想要名稱可點 Add 按鈕增加</small>
+
+            <div class="form-group">
+                <label for="singleUsername">活動名稱</label>
+                <input type="text" class="form-control" id="activityname" aria-describedby="activitynameHelp"
+                    placeholder="Enter Activity Name" name="activityname">
+                <small id="activitynameHelp" class="form-text text-muted">儲存至資料庫活動名稱，若不儲存可不填</small>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+    <button id="btn" class="btn btn-primary">
+        <!-- Spinners -->
+        <span class="spinner-border spinner-border-sm" id="loading" role="status" aria-hidden="true"></span>
+        Submit
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">新增活動標籤名稱</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <!-- <label for="inputAct">活動標籤名稱</label>
+                            <input type="text" class="form-control" id="inputAct" name="activity"
+                                placeholder="Enter Activity Tag Name"> -->
+                            {{ addform.name.label_tag }}
+                            {{ addform.name }}
+                        </div>
+                        {% if addform.name.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{addform.name.errors.0}}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success" name="create">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
+
 {% block js %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!--在input裡顯示檔案名稱-->
 <script type="text/javascript">
     $('#file').change(function (e) {
         $(this).next('.custom-file-label').html(e.target.files[0].name);
+    });
+</script>
+<!--表單操作-->
+<script type="text/javascript">
+    $(() => {
+        $("#loading").hide();
+        $("#btn").click(() => {
+            $("#btn").prop('disabled', true);
+            $("#loading").show();
+            let formData = new FormData();
+            formData.append('username', $('#singleUsername').val())
+            formData.append('file', document.getElementById("file").files[0])
+            formData.append('password', $('#singlePassword').val())
+            formData.append('check', $('#multiCheck').val())
+            formData.append('tag', $('#inputGroupSelect').val())
+            formData.append('activityname', $('#activityname').val())
+            let oReq = new XMLHttpRequest();
+            oReq.open("POST", "{% url 'multi' %}", true);
+            oReq.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            oReq.responseType = "arraybuffer";
+            oReq.onload = (oEvent) => {
+                let blob = new Blob([oReq.response], { type: "application/vnd.ms-excel" });
+                let url = URL.createObjectURL(blob);
+
+                var a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+                a.href = url;
+                a.download = 'Output.xlsx';
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                $("#loading").hide();
+                $("#btn").prop('disabled', false);
+            };
+            oReq.send(formData);
+        });
     });
 </script>
 {% endblock %}

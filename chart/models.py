@@ -1,22 +1,20 @@
 from django.db import models
+
 import re
 
 # Create your models here.
+class ActivityTag(models.Model):
+    name = models.CharField(max_length=20, null=False)
 
-"""活動名稱"""
 class Activity(models.Model):
-    name = models.CharField(max_length=80)
+    name = models.CharField(max_length=80, null=False)
+    tag_id = models.ForeignKey(ActivityTag, related_name='tags', on_delete=models.CASCADE)
 
     #全部社課
     @classmethod
     def get_all_activity_list(cls):
         return cls.objects.all()
 
-"""
-一個 Activity 有多個 Member，一對多的關係
-"""
-
-"""活動成員"""
 class Member(models.Model):
     name = models.CharField(max_length=80) #姓名
     nid = models.CharField(max_length=10) #學號
@@ -64,4 +62,3 @@ class Member(models.Model):
             except KeyError:
                 result[s] = 1
         return result
-

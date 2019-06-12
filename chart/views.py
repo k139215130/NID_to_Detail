@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
-from .models import Activity, Member
+from django.views.decorators.csrf import csrf_exempt
 
 #Get NID
 import requests
@@ -21,7 +21,10 @@ from openpyxl.writer.excel import save_virtual_workbook
 from pyecharts import Line, Bar, Pie
 
 # forms
-from .forms import SingleForm
+from .forms import SingleForm, ActivityTagForm
+
+# model
+from .models import ActivityTag, Activity, Member
 
 def single(request):
     form = SingleForm()
@@ -74,10 +77,22 @@ def single(request):
     return render(request, 'single.html', {'form':form, 'result':result})
 
 
+@csrf_exempt
 def multi(request):
-    if request.method == "POST":
-        if request.POST.get('check') == 'on':
-            act = Activity.objects.create(name=request.POST.get('name'))
+    tag = ActivityTag.objects.all()
+    addform = ActivityTagForm()
+    
+    # Add
+    if request.method == "POST" and 'create' in request.POST:
+        addform = ActivityTagForm(request.POST)
+        if addform.is_valid():
+            addform.save(commit=True)
+            addform = ActivityTagForm()
+            tag = ActivityTag.objects.all()
+        return render(request, 'multi.html', {'tag':tag, 'addform':addform})
+        
+    # Mutil
+    if request.is_ajax():
         # 讀檔後放入 nidList
         nidList = []
         wb = load_workbook(filename=request.FILES['file'], read_only=True)
@@ -106,8 +121,7 @@ def multi(request):
         elif re.search('對不起!!您無權進入系統!', bs_loginPage):
             messages.add_message(request, messages.ERROR, '帳號密碼輸入錯誤!', extra_tags='user')
             return render(request, 'multi.html', {})
-        wb = Workbook()
-        ws = wb.create_sheet('詳細資料', 0)
+        result = []
         for nid in nidList:
             searchData = {
                 'stuid': nid, # 學號
@@ -117,20 +131,30 @@ def multi(request):
             bs_searchPage = BeautifulSoup(searchPage.text, "html.parser")  # 分析查詢頁面
             if re.search('抱歉, 資料不存在!', bs_searchPage.get_text(strip=True)):
                 d = {'學號': nid, '系級': '查無資料', '姓名': '查無資料','性別': '查無資料', '出生年月日': '查無資料'}
+                result.append(d)
             else:
-                result = bs_searchPage.select("table.tableStyle td.tableContentLeft")
-                newResult = []
-                for i in result:
-                    newResult.append(re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
-                d = {'學號': newResult[0], '系級': newResult[1], '姓名': newResult[2], '性別': newResult[3], '出生年月日': newResult[4]}
+                page = bs_searchPage.select("table.tableStyle td.tableContentLeft")
+                tmpResult = []
+                for i in page:
+                    tmpResult.append(re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
+                d = {'學號': tmpResult[0], '系級': tmpResult[1], '姓名': tmpResult[2], '性別': tmpResult[3], '出生年月日': tmpResult[4]}
+                result.append(d)
+            
+            # 產生 Excel
+            wb = Workbook()
+            ws = wb.create_sheet('詳細資料', 0)
+            for i in result:
+                ws.append(i)
+
             # 儲存置資料庫
             if request.POST.get('check') == 'on':
-                act.activitys.create(name=d['姓名'], nid=d['學號'], department=d['系級'], sex=d['性別'], birthday=d['出生年月日'])
-            ws.append([d['學號'], d['系級'], d['姓名'], d['性別'], d['出生年月日']])
-        response = HttpResponse(save_virtual_workbook(wb), content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename=Output.xlsx'
-        return response
-    return render(request, 'multi.html', {})
+                tagTmp = ActivityTag.objects.get(name=request.POST.get('tag'))
+                ActivityTmp = tagTmp.tags.create(name=request.POST.get('activityname'))
+                for i in result:
+                    ActivityTmp.activitys.create(name=i[0], nid=i[1], department=i[2], sex=i[3], birthday=i[4])
+           
+        return HttpResponse(save_virtual_workbook(wb))
+    return render(request, 'multi.html', {'tag':tag, 'addform':addform})
 
 
 def chart(request):
