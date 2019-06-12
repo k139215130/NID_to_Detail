@@ -19,6 +19,7 @@ from . import views
 
 urlpatterns = [
     path('', include('chart.urls')),
+    path('', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('', views.index, name='index')
 ]
