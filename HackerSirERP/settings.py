@@ -121,5 +121,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 #login
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = 'accounts/login/'
+from django.urls import reverse_lazy
+LOGIN_REDIRECT_URL = reverse_lazy('index')
+LOGIN_URL = reverse_lazy('login')

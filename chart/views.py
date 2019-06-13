@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
 #Get NID
 import requests
@@ -77,6 +78,7 @@ def single(request):
     return render(request, 'single.html', {'form':form, 'result':result})
 
 
+@login_required
 @csrf_exempt
 def multi(request):
     tag = ActivityTag.objects.all()
@@ -198,5 +200,6 @@ def chart(request):
     return render(request, 'chart.html', { 'all_course_charts':all_course_charts, 'all_course_name':all_course_name, 'all_course_detail':all_course_detail, 'sex_number_charts':sex_number_charts, 'level_number_charts':level_number_charts, 'department_number_charts':department_number_charts})
 
 
+@login_required
 def edit(request):
     return render(request, 'edit.html', {})

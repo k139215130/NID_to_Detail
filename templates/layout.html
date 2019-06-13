@@ -34,16 +34,18 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'single' %}">Single</a>
                 </li>
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'multi' %}">Multi</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'edit' %}">Edit</a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'chart' %}">Chart</a>
                 </li>
-                <li class="nav-item dropdown">
+                <!-- <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         課程簡報
@@ -55,12 +57,16 @@
                             target="_blank">第二份簡報</a>
                         <div class="dropdown-divider"></div>
                     </div>
-                </li>
+                </li> -->
             </ul>
             {% if user.is_authenticated %}
             <a class="btn btn-outline-light" href="{% url 'logout' %}">Logout</a>
             {% else %}
-            <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
+            <!-- <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a> -->
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <a class="btn btn-outline-success" href="{% url 'register' %}">Regist</a>
+                <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
+            </div>
             {% endif %}
         </div>
     </nav>
