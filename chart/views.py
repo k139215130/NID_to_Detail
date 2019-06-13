@@ -221,9 +221,3 @@ def chart(request):
     
     return render(request, 'chart.html', { 'all_course_charts':all_course_charts, 'all_course_name':all_course_name, 'all_course_detail':all_course_detail, 'sex_number_charts':sex_number_charts, 'level_number_charts':level_number_charts, 'department_number_charts':department_number_charts})
 
-
-@login_required
-def edit(request):
-    tag = ActivityTag.objects.all()
-
-    return render(request, 'edit.html', {'tag':tag})
