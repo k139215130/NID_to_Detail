@@ -10,17 +10,26 @@
 <div class="container">
     <!--最上方按鈕-->
     <p>
-        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
-            aria-expanded="false" aria-controls="collapseExample">
-            社課總人數
-        </button>
-        {% for c in all_course_name %}
-        <button class="btn btn-primary" type="button" data-toggle="collapse"
-            data-target="#collapseCourse-{{ forloop.counter0 }}" aria-expanded="false"
-            aria-controls="collapseCourse-{{ forloop.counter0 }}">
-            {{ c }}
-        </button>
-        {% endfor %}
+        {% if all_course_name %}
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample">
+                社課總人數
+            </button>
+            {% for c in all_course_name %}
+            <button class="btn btn-primary" type="button" data-toggle="collapse"
+                data-target="#collapseCourse-{{ forloop.counter0 }}" aria-expanded="false"
+                aria-controls="collapseCourse-{{ forloop.counter0 }}">
+                {{ c }}
+            </button>
+            {% endfor %}
+        {% else %}
+        <div class="alert alert-dark" role="alert">
+            <h4 class="alert-heading">無資料</h4>
+            <a href="{% url 'multi' %}"  class="alert-link">趕快點此前往新增</a>
+            <hr>
+            <a href="{% url 'register' %}" class="mb-0 alert-link">還沒有帳號嗎?點此前往註冊</a>
+        </div>
+        {% endif %}
     </p>
     <div class="collapse" id="collapseExample">
         <div class="card border-dark">

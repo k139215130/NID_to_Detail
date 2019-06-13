@@ -108,13 +108,17 @@ def multi(request):
         for row in sheet.rows:
             for cell in row:
                 nidList.append(cell.value)
+        
         # 獲取登入網頁
         s = requests.Session()
         try:
             login = s.get("http://infocenter.fcu.edu.tw/assoc/assoc_login.jsp", timeout=3)
         except:
-            messages.add_message(request, messages.ERROR, '未使用校內網路!', extra_tags='all')
-            return render(request, 'multi.html', {})
+            messages.add_message(request, messages.ERROR, '未使用校內網路!')
+            tag = ActivityTag.objects.all()
+            addform = ActivityTagForm()
+            return render(request, 'multi.html', {'tag':tag, 'addform':addform})
+        
         # 登入
         loginData = {
             'asn_code': 'A66',  # 社團代號
@@ -123,12 +127,18 @@ def multi(request):
         }
         login = s.post('http://infocenter.fcu.edu.tw/assoc/authenticate.jsp', data=loginData)
         bs_loginPage = BeautifulSoup(login.text, "html.parser").get_text(strip=True)  # 分析登入頁面
+        
         if re.search('對不起!!您的帳號/密碼有誤!!', bs_loginPage):
-            messages.add_message(request, messages.ERROR, '帳號密碼輸入錯誤!', extra_tags='user')
-            return render(request, 'multi.html', {})
+            messages.add_message(request, messages.ERROR, '帳號密碼輸入錯誤!')
+            tag = ActivityTag.objects.all()
+            addform = ActivityTagForm()
+            return render(request, 'multi.html', {'tag':tag, 'addform':addform})
         elif re.search('對不起!!您無權進入系統!', bs_loginPage):
-            messages.add_message(request, messages.ERROR, '帳號密碼輸入錯誤!', extra_tags='user')
-            return render(request, 'multi.html', {})
+            messages.add_message(request, messages.ERROR, '帳號密碼輸入錯誤!')
+            tag = ActivityTag.objects.all()
+            addform = ActivityTagForm()
+            return render(request, 'multi.html', {'tag':tag, 'addform':addform})
+        
         result = []
         for nid in nidList:
             searchData = {
@@ -137,29 +147,30 @@ def multi(request):
             }
             searchPage = s.post('http://infocenter.fcu.edu.tw/assoc/assoc30.jsp', data=searchData)
             bs_searchPage = BeautifulSoup(searchPage.text, "html.parser")  # 分析查詢頁面
+            
             if re.search('抱歉, 資料不存在!', bs_searchPage.get_text(strip=True)):
                 d = {'學號': nid, '系級': '查無資料', '姓名': '查無資料','性別': '查無資料', '出生年月日': '查無資料'}
-                result.append(d)
             else:
-                page = bs_searchPage.select("table.tableStyle td.tableContentLeft")
-                tmpResult = []
-                for i in page:
-                    tmpResult.append(re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
-                d = {'學號': tmpResult[0], '系級': tmpResult[1], '姓名': tmpResult[2], '性別': tmpResult[3], '出生年月日': tmpResult[4]}
-                result.append(d)
+                tmp = []
+                for i in  bs_searchPage.select("table.tableStyle td.tableContentLeft"):
+                    tmp.append(re.search(r'>(.*)<', re.sub(r'\s', '', str(i))).group(1))
+                
+                d = {'學號': tmp[0], '系級': tmp[1], '姓名': tmp[2], '性別': tmp[3], '出生年月日': tmp[4]}
             
-            # 產生 Excel
-            wb = Workbook()
-            ws = wb.create_sheet('詳細資料', 0)
-            for i in result:
-                ws.append(i)
+            result.append([d['學號'], d['系級'], d['姓名'], d['性別'], d['出生年月日']])
+            
+        # 產生 Excel
+        wb = Workbook()
+        ws = wb.create_sheet('詳細資料', 0)
+        for i in result:
+            ws.append(i)
 
-            # 儲存置資料庫
-            if request.POST.get('check') == 'on':
-                tagTmp = ActivityTag.objects.get(name=request.POST.get('tag'))
-                ActivityTmp = tagTmp.tags.create(name=request.POST.get('activityname'))
-                for i in result:
-                    ActivityTmp.activitys.create(name=i[0], nid=i[1], department=i[2], sex=i[3], birthday=i[4])
+        # 儲存置資料庫
+        if request.POST.get('check') == 'on':
+            tagTmp = ActivityTag.objects.get(name=request.POST.get('tag'))
+            ActivityTmp = tagTmp.tags.create(name=request.POST.get('activityname'))
+            for i in result:
+                ActivityTmp.activitys.create(name=i[0], nid=i[1], department=i[2], sex=i[3], birthday=i[4])
            
         return HttpResponse(save_virtual_workbook(wb))
     return render(request, 'multi.html', {'tag':tag, 'addform':addform})
