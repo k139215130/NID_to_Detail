@@ -6,6 +6,16 @@
 <div class="container">
     <h3>Get Single Nid</h3>
     <hr>
+
+    {% for message in messages %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+
     <form method="POST">
         {% csrf_token %}
 
@@ -34,10 +44,10 @@
             </button>
         </div>
         {% endif %}
-        
+
         <div class="form-group">
             {{ form.nid.label_tag }}
-            {{ form.nid }}  
+            {{ form.nid }}
         </div>
         {% if form.nid.errors %}
         <div class="alert alert-danger" role="alert">
@@ -60,6 +70,5 @@
         </div>
     </div>
     {% endif %}
-
 </div>
 {% endblock %}
