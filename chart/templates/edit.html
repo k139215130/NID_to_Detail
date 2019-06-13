@@ -5,5 +5,25 @@
 {% block content %}
 <div class="container">
     <h3>Edit</h3>
+    <hr>
+    <!-- Tag -->
+    {% for i in tag %}
+    <p>
+        <button class="btn btn-primary" type="button" data-toggle="collapse"
+            data-target="#collapseTag-{{ forloop.counter0 }}" aria-expanded="false"
+            aria-controls="collapseTag-{{ forloop.counter0 }}">
+            {{ i.name }}
+        </button>
+    </p>
+    {% endfor %}
+
+    {% for i in all_course_name %}
+        <div class="collapse" id="collapseTag-{{ forloop.counter0 }}">
+            <p>
+
+            </p>
+        </div>
+    {% endfor %}
+
 </div>
 {% endblock %}

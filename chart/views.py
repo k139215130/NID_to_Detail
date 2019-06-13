@@ -188,14 +188,17 @@ def chart(request):
         all_course_name.append(i.name)
         all_course_people.append(Member.get_activity_member_count(act=i))
         all_course_detail.append(Member.get_activity_member(act=i))
+        
         #單一社課男女人數(圖)
         pie = Pie(i.name, "男女人數")
         pie.add("人數", ['男生', '女生'], Member.get_sex_number(act=i))
         sex_number_charts.append(pie.render_embed())
+        
         #單一社課年級人數(圖)
         bar = Bar(i.name, "年級人數")
         bar.add("人數", ['大一', '大二', '大三', '大四'], Member.get_level_number(act=i))
         level_number_charts.append(bar.render_embed())
+        
         #單一社課各系人數
         result = Member.get_department_number(act=i)
         department_list = []
@@ -207,6 +210,7 @@ def chart(request):
         bar.add("人數", department_list, people_list)
         department_number_charts.append(bar.render_embed())
         del result, department_list, people_list
+        
         #單一社課各學院人數
         """未完成"""
 
@@ -214,9 +218,12 @@ def chart(request):
     line = Line("黑客社", "社課總人數")
     line.add("人數", all_course_name, all_course_people)
     all_course_charts = line.render_embed()
+    
     return render(request, 'chart.html', { 'all_course_charts':all_course_charts, 'all_course_name':all_course_name, 'all_course_detail':all_course_detail, 'sex_number_charts':sex_number_charts, 'level_number_charts':level_number_charts, 'department_number_charts':department_number_charts})
 
 
 @login_required
 def edit(request):
-    return render(request, 'edit.html', {})
+    tag = ActivityTag.objects.all()
+
+    return render(request, 'edit.html', {'tag':tag})
