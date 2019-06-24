@@ -125,12 +125,16 @@
                     {% for j in all_course_detail %}
                         {% if forloop.counter0 == forloop.parentloop.counter0 %}
                             {% for item in j %}
-                            <p>{{ item.nid }}</p>
-                            <p>{{ item.name }}</p>
-                            <p>{{ item.department }}</p>
-                            <p>{{ item.sex }}</p>
-                            <p>{{ item.birthday }}</p>
-                            <hr>
+                                {% if user.is_authenticated %}
+                                    <p>{{ item.nid }}</p>
+                                    <p>{{ item.name }}</p>
+                                    <p>{{ item.department }}</p>
+                                    <p>{{ item.sex }}</p>
+                                    <p>{{ item.birthday }}</p>
+                                {% else %}
+                                    <p>{{ item.name }}</p>
+                                {% endif %}
+                                <hr>
                             {% endfor %}
                         {% endif %}
                     {% endfor %}
