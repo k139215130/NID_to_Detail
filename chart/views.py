@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 import requests
 from bs4 import BeautifulSoup
 import re
+import json
 
 #Read Excel
 from openpyxl import load_workbook, Workbook
@@ -170,7 +171,7 @@ def multi(request):
             tagTmp = ActivityTag.objects.get(name=request.POST.get('tag'))
             ActivityTmp = tagTmp.tags.create(name=request.POST.get('activityname'))
             for i in result:
-                ActivityTmp.activitys.create(name=i[0], nid=i[1], department=i[2], sex=i[3], birthday=i[4])
+                ActivityTmp.activitys.create(name=i[2], nid=i[0], department=i[1], sex=i[3], birthday=i[4])
            
         return HttpResponse(save_virtual_workbook(wb))
     return render(request, 'multi.html', {'tag':tag, 'addform':addform})
@@ -220,4 +221,22 @@ def chart(request):
     all_course_charts = line.render_embed()
     
     return render(request, 'chart.html', { 'all_course_charts':all_course_charts, 'all_course_name':all_course_name, 'all_course_detail':all_course_detail, 'sex_number_charts':sex_number_charts, 'level_number_charts':level_number_charts, 'department_number_charts':department_number_charts})
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def bot(request):
+    req = json.loads(request.body)
+    if req['queryResult']['parameters']['any'] != '':
+        keyword = req['queryResult']['parameters']['any']
+    
+    message = ''
+    message += keyword+'參與的活動有: '
+    for i in Member.objects.filter(nid=keyword).all():
+        message += i.activity.name + ' '
+    data={
+        'fulfillmentText': message
+    }
+    return JsonResponse(data)
 
